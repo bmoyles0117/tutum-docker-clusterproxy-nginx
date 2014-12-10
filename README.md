@@ -1,5 +1,5 @@
-tutum-docker-clusterproxy
-=========================
+tutum-docker-clusterproxy-nginx
+===============================
 
 Nginx image that balances between linked containers and, if launched in Tutum, 
 reconfigures itself when a linked cluster member joins or leaves
