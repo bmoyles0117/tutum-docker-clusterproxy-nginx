@@ -50,7 +50,40 @@ server {
 				Port:          "80",
 			},
 			&BackendRoute{
+				ContainerName: "WEB_2",
+				Addr:          "127.0.0.1",
+				Port:          "81",
+			},
+		})
+
+		So(string(config), ShouldEqual, `
+upstream backend {
+	server 127.0.0.0:80;
+	server 127.0.0.1:81;
+
+}
+
+server {
+	location / {
+		proxy_pass http://backend;
+	}
+}`)
+	})
+
+	Convey("A config writer with duplicate backend routes by address should eliminate duplicates", t, func() {
+		config := getNginxConfig([]*BackendRoute{
+			&BackendRoute{
 				ContainerName: "WEB_1",
+				Addr:          "127.0.0.0",
+				Port:          "80",
+			},
+			&BackendRoute{
+				ContainerName: "WEB_1",
+				Addr:          "127.0.0.0",
+				Port:          "80",
+			},
+			&BackendRoute{
+				ContainerName: "WEB_2",
 				Addr:          "127.0.0.1",
 				Port:          "81",
 			},

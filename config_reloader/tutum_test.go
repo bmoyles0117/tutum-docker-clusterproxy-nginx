@@ -15,6 +15,19 @@ func (mrt MockRoundTripper) RoundTrip(req *http.Request) (*http.Response, error)
 	return mrt(req)
 }
 
+func TestBackendRouteGetAddr(t *testing.T) {
+	Convey("The backend route should always produce ADDR:PORT", t, func() {
+		backendRoute := &BackendRoute{Addr: "127.0.0.1", Port: "80"}
+		So(backendRoute.GetAddr(), ShouldEqual, "127.0.0.1:80")
+
+		backendRoute = &BackendRoute{Port: "80"}
+		So(backendRoute.GetAddr(), ShouldEqual, ":80")
+
+		backendRoute = &BackendRoute{Addr: "127.0.0.1"}
+		So(backendRoute.GetAddr(), ShouldEqual, "127.0.0.1:")
+	})
+}
+
 func TestServiceEndpointGetService(t *testing.T) {
 	Convey("Returning an error should be returned by GetService", t, func() {
 		mrt := MockRoundTripper(func(req *http.Request) (*http.Response, error) {

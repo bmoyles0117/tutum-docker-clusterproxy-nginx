@@ -44,6 +44,10 @@ type BackendRoute struct {
 	Port          string
 }
 
+func (br *BackendRoute) GetAddr() string {
+	return br.Addr + ":" + br.Port
+}
+
 type Service struct {
 	LinkVariables map[string]string `json:"link_variables"`
 }
