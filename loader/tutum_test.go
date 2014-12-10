@@ -62,3 +62,40 @@ func TestExtractApiEndpoints(t *testing.T) {
 		So(apiEndpoints[1].Url, ShouldEqual, "https://dashboard.tutum.co/api/v1/service/SERVICE_UUID2/")
 	})
 }
+
+func TestExtractBackendRoutes(t *testing.T) {
+	Convey("A map without any values should not produce backend routes", t, func() {
+		backendRoutes := extractBackendRoutes("_PORT_80_TCP", map[string]string{})
+		So(backendRoutes, ShouldBeEmpty)
+	})
+
+	Convey("A map with just an addr and not a port should define a backend route accordingly", t, func() {
+		backendRoutes := extractBackendRoutes("_PORT_80_TCP", map[string]string{
+			"WORDPRESS_STACKABLE_1_PORT_80_TCP_ADDR": "wordpress-stackable-1.9691c44e-admin.node.staging.tutum.io",
+		})
+		So(len(backendRoutes), ShouldEqual, 1)
+		So(backendRoutes["WORDPRESS_STACKABLE_1"].Addr, ShouldEqual, "wordpress-stackable-1.9691c44e-admin.node.staging.tutum.io")
+		So(backendRoutes["WORDPRESS_STACKABLE_1"].Port, ShouldEqual, "")
+	})
+
+	Convey("A map with just a port and not an addr should define a backend route accordingly", t, func() {
+		backendRoutes := extractBackendRoutes("_PORT_80_TCP", map[string]string{
+			"WORDPRESS_STACKABLE_1_PORT_80_TCP_PORT": "80",
+		})
+		So(len(backendRoutes), ShouldEqual, 1)
+		So(backendRoutes["WORDPRESS_STACKABLE_1"].Addr, ShouldEqual, "")
+		So(backendRoutes["WORDPRESS_STACKABLE_1"].Port, ShouldEqual, "80")
+	})
+
+	Convey("A map with both port and addr should define a backend route accordingly", t, func() {
+		backendRoutes := extractBackendRoutes("_PORT_80_TCP", map[string]string{
+			"WORDPRESS_STACKABLE_1_PORT_80_TCP_ADDR": "wordpress-stackable-1.9691c44e-admin.node.staging.tutum.io",
+			"TEST1": "1",
+			"TEST2": "2",
+			"WORDPRESS_STACKABLE_1_PORT_80_TCP_PORT": "80",
+		})
+		So(len(backendRoutes), ShouldEqual, 1)
+		So(backendRoutes["WORDPRESS_STACKABLE_1"].Addr, ShouldEqual, "wordpress-stackable-1.9691c44e-admin.node.staging.tutum.io")
+		So(backendRoutes["WORDPRESS_STACKABLE_1"].Port, ShouldEqual, "80")
+	})
+}

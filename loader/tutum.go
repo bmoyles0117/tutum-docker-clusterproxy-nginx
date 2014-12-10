@@ -10,6 +10,12 @@ type ApiEndpoint struct {
 	Url         string
 }
 
+type BackendRoute struct {
+	ContainerName string
+	Addr          string
+	Port          string
+}
+
 func extractApiEndpoint(environ string) (*ApiEndpoint, error) {
 	parts := strings.SplitN(environ, "=", 2)
 	if len(parts) != 2 {
@@ -38,4 +44,34 @@ func extractApiEndpoints(environs []string) []*ApiEndpoint {
 	}
 
 	return apiEndpoints
+}
+
+func extractBackendRoutes(filter string, values map[string]string) map[string]*BackendRoute {
+	backendRoutes := map[string]*BackendRoute{}
+	filterLen := len(filter)
+
+	for k, v := range values {
+		index := strings.Index(k, filter)
+		if index == -1 {
+			continue
+		}
+
+		containerName := k[:index]
+
+		backendRoute, exists := backendRoutes[containerName]
+		if !exists {
+			backendRoute = &BackendRoute{}
+			backendRoutes[containerName] = backendRoute
+		}
+
+		if k[index+filterLen:] == "_ADDR" {
+			backendRoute.Addr = v
+		}
+
+		if k[index+filterLen:] == "_PORT" {
+			backendRoute.Port = v
+		}
+	}
+
+	return backendRoutes
 }
